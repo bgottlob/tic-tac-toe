@@ -6,4 +6,36 @@ defmodule TicTacToe.Core.Game do
   def new() do
     struct!(__MODULE__, %{})
   end
+
+  # Get the player whose turn it currently is
+  defp player_turn(game) do
+    elem(game.players, game.turn)
+  end
+
+  defp next_turn(game) do
+    Map.update!(
+      game,
+      :turn,
+      fn turn ->
+        Integer.mod(turn + 1, tuple_size(game.players))
+      end
+    )
+  end
+
+  def move(game, coord) do
+    case Board.move(game.board, coord, player_turn(game)) do
+      {:error, reason} ->
+        IO.puts(reason)
+        game # Move is not executed, game is unchanged
+      new_board ->
+        # Move is executed, update board and player turn
+        game
+        |> Map.put(:board, new_board)
+        |> next_turn()
+    end
+  end
+
+  def to_string(game) do
+    "Turn: #{player_turn(game)}\n#{Board.to_string(game.board)}"
+  end
 end
