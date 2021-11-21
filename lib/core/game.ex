@@ -1,7 +1,11 @@
 defmodule TicTacToe.Core.Game do
   alias TicTacToe.Core.Board
 
-  defstruct turn: 0, players: {:X, :O}, board: Board.new(3), winner: nil
+  defstruct turn: 0,
+    players: {:X, :O},
+    board: Board.new(3),
+    winner: nil,
+    to_win: 3
 
   def new() do
     struct!(__MODULE__, %{})
@@ -22,6 +26,13 @@ defmodule TicTacToe.Core.Game do
     )
   end
 
+  def check_winner(game, coord) do
+    case Board.winner?(game.board, coord, game.to_win) do
+      nil -> game
+      winner -> Map.put(game, :winner, winner)
+    end
+  end
+
   def move(game, coord) do
     case Board.move(game.board, coord, player_turn(game)) do
       {:error, reason} ->
@@ -31,11 +42,12 @@ defmodule TicTacToe.Core.Game do
         # Move is executed, update board and player turn
         game
         |> Map.put(:board, new_board)
+        |> check_winner(coord)
         |> next_turn()
     end
   end
 
   def to_string(game) do
-    "Turn: #{player_turn(game)}\n#{Board.to_string(game.board)}"
+    "Winner: #{game.winner}\nTurn: #{player_turn(game)}\n#{Board.to_string(game.board)}"
   end
 end

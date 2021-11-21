@@ -69,4 +69,54 @@ defmodule TicTacToe.Core.Board do
     |> Map.keys()
     |> Enum.filter(&(Map.fetch!(board.state, &1) == nil))
   end
+
+  def winner?(board, root_coord, to_win) do
+    # TODO piece cannot be nil!
+    piece = Map.fetch!(board.state, root_coord)
+    directions = [:vertical, :horizontal, :diagonal, :back_diagonal]
+    have_winner = 
+      directions
+      |> Stream.map(fn direction ->
+        dfs(board.state, piece, direction, root_coord, MapSet.new())
+      end)
+      |> Enum.any?(fn path_set ->
+      # to_win = 3 for Tic-Tac-Toe
+        MapSet.size(path_set) >= to_win
+      end)
+
+    if have_winner do
+      piece
+    else
+      nil
+    end
+  end
+
+  defp possible_neighbors(:vertical,      {x,y}), do: [{x,  y+1}, {x,  y-1}]
+  defp possible_neighbors(:horizontal,    {x,y}), do: [{x+1,y  }, {x-1,y  }]
+  defp possible_neighbors(:diagonal,      {x,y}), do: [{x+1,y-1}, {x-1,y+1}]
+  defp possible_neighbors(:back_diagonal, {x,y}), do: [{x+1,y+1}, {x-1,y-1}]
+
+  defp neighbors(state, piece, direction, coord, visited) do
+    possible_neighbors(direction, coord)
+    |> Stream.filter(fn neighbor -> # don't re-visit coordinates
+      !MapSet.member?(visited, neighbor)
+    end)
+    |> Enum.filter(fn neighbor ->
+      # Has the effect of removing coordinates with pieces that do not match
+      # the current AND out of bounds coordinates
+      Map.get(state, neighbor) == piece
+    end)
+  end
+
+  defp dfs(state, piece, direction, coord, visited) do
+    visited = MapSet.put(visited, coord)
+    case neighbors(state, piece, direction, coord, visited) do
+      [] ->
+        visited
+      neighbors ->
+        Enum.reduce(neighbors, visited, fn neighbor, acc ->
+          MapSet.union(acc, dfs(state, piece, direction, neighbor, visited))
+        end)
+    end
+  end
 end
