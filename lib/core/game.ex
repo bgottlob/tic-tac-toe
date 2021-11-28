@@ -26,11 +26,12 @@ defmodule TicTacToe.Core.Game do
     )
   end
 
-  def check_winner(game, coord) do
-    case Board.winner?(game.board, coord, game.to_win) do
-      nil -> game
-      winner -> Map.put(game, :winner, winner)
-    end
+  defp check_winner(game, coord) do
+    Map.put(
+      game,
+      :winner,
+      Board.winner?(game.board, coord, game.to_win)
+    )
   end
 
   def move(game, coord) do
