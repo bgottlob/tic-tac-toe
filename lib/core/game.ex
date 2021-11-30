@@ -1,6 +1,8 @@
 defmodule TicTacToe.Core.Game do
   alias TicTacToe.Core.Board
 
+  require Logger
+
   defstruct turn: 0,
     players: {:X, :O},
     board: Board.new(3),
@@ -37,7 +39,7 @@ defmodule TicTacToe.Core.Game do
   def move(game, coord) do
     case Board.move(game.board, coord, player_turn(game)) do
       {:error, reason} ->
-        IO.puts(reason)
+        Logger.warn(reason)
         game # Move is not executed, game is unchanged
       new_board ->
         # Move is executed, update board and player turn
