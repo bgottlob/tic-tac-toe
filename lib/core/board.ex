@@ -17,10 +17,12 @@ defmodule TicTacToe.Core.Board do
     for x <- 0..(rows - 1), y <- 0..(columns-1), do: {x,y}
   end
 
+  # Sorts coordinates for the purposes of rendering the board
+  # Descending by row, then ascending by column
   defp sort_coordinates(coords) do
     Enum.sort(coords, fn
-      {x_1,_}, {x_2,_} when x_1 >= x_2 -> true
-      {x,y_1}, {x,y_2} when y_1 >= y_2 -> true
+      {_,y_1}, {_,y_2} when y_1 >= y_2 -> true
+      {x_1,y}, {x_2,y} when x_1 <= x_2 -> true
       {x,y}, {x,y}                     -> true # won't actually happen
       _, _                             -> false
     end)

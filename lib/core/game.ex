@@ -51,6 +51,13 @@ defmodule TicTacToe.Core.Game do
   end
 
   def to_string(game) do
-    "Winner: #{game.winner}\nTurn: #{player_turn(game)}\n#{Board.to_string(game.board)}"
+    turn = case game.winner do
+      nil -> player_turn(game)
+      _   -> "None"
+    end
+
+    "Winner: #{game.winner || "None"}\n" <>
+      "Turn: #{turn}\n" <>
+        "#{Board.to_string(game.board)}"
   end
 end
