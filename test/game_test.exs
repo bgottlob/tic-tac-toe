@@ -2,7 +2,9 @@ defmodule GameTest do
   use ExUnit.Case, async: true
 
   alias TicTacToe.Core.Game
+
   import TicTacToe.Core.Game
+  import TicTacToe.TestHelper
 
   test "an invalid move attempt does not advance to the next player's turn" do
     game = move(new(), {0,0})
@@ -51,10 +53,7 @@ defmodule GameTest do
     OX-
     X--
     """
-    |> String.split("\n")
-    |> Enum.map(&(String.trim(&1)))
-    |> Enum.join("\n")
-    |> String.trim()
+    |> trim_multiline()
 
     actual = Game.to_string(game)
 
@@ -77,10 +76,7 @@ defmodule GameTest do
     OX-
     X--
     """
-    |> String.split("\n")
-    |> Enum.map(&(String.trim(&1)))
-    |> Enum.join("\n")
-    |> String.trim()
+    |> trim_multiline()
 
     actual = Game.to_string(game)
 
