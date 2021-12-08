@@ -1,5 +1,6 @@
 defmodule BoardTest do
   use ExUnit.Case, async: true
+  use PropCheck
 
   alias TicTacToe.Core.Board
   import TicTacToe.TestHelper
@@ -74,5 +75,43 @@ defmodule BoardTest do
     |> refute_winning_move.({1,0}, :X)
     |> refute_winning_move.({1,1}, :O)
     |> assert_winning_move.({2,0}, :X, :X)
+  end
+
+  property "board contains rows * columns (size * size) spaces" do
+    forall size <- pos_integer() do
+      expected_spaces = size * size
+      board = new(size)
+
+      board.columns * board.rows == expected_spaces &&
+        Enum.count(board.state) == expected_spaces
+    end
+  end
+
+  property "there is no winner until at least 5 moves with the alternating pieces have been made" do
+    # TODO Generalize for any size board, any # of pieces in a row to win
+    forall {moves, num_moves} <- {non_empty(list({range(0,2), range(0,2)})), range(1,5)} do
+      moves = Enum.slice(moves, 0, num_moves)
+      board = apply_moves(moves, new(3))
+      winner?(board, List.last(moves), 3) == nil
+      true
+    end
+  end
+
+  def apply_moves(moves, board) do
+    # Arbitrarily start with :X
+    apply_moves(moves, :X, board)
+  end
+
+  def apply_moves([], _piece, board), do: board
+  def apply_moves([m | rest], piece, board) do
+    new_board = case move(board, m, piece) do
+      {:error, _reason} -> board
+      new_board -> new_board
+    end
+    next_piece = case piece do
+      :X -> :O
+      :O -> :X
+    end
+    apply_moves(rest, next_piece, new_board)
   end
 end
